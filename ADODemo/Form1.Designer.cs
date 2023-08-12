@@ -160,6 +160,7 @@
             this.btnShowAll.TabIndex = 13;
             this.btnShowAll.Text = "Show All";
             this.btnShowAll.UseVisualStyleBackColor = true;
+            this.btnShowAll.Click += new System.EventHandler(this.btnShowAll_Click);
             // 
             // comboCategory
             // 

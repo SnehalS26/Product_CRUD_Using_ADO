@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADODemo.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,23 +9,24 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using ADODemo.Model;
+
 namespace ADODemo
 {
-    public partial class Form1 : Form
+    public partial class Form3 : Form
     {
-        ProductCRUD crud;
-        List<Category> list;
-        public Form1()
+        ProductDisconnectted crud;
+        //List<Category> list;
+        DataTable table;
+        public Form3()
         {
             InitializeComponent();
-            crud = new ProductCRUD();
+            crud = new ProductDisconnectted();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form3_Load(object sender, EventArgs e)
         {
-            list = crud.GetCategories();
-            comboCategory.DataSource = list;
+            table = crud.GetAllCategories();
+            comboCategory.DataSource = table;
             comboCategory.DisplayMember = "Cname";
             comboCategory.ValueMember = "Cid";
         }
@@ -46,30 +48,6 @@ namespace ADODemo
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
-
-        }
-
-        private void btnSearch_Click(object sender, EventArgs e)
-        {
-            Product prod = crud.GetProductById(Convert.ToInt32(textProdId.Text));
-            
-            if (prod.Id> 0)
-            {
-                foreach(Category item in list)
-                {
-                    if(item.Cid == prod.Cid)
-                    {
-                        comboCategory.Text = item.Cname;
-                        break;
-                    }
-                }
-                textProdName.Text = prod.Name;
-                textProdPrice.Text = prod.Price.ToString(); 
-            }
-            else
-            {
-                MessageBox.Show("Record not found");
             }
         }
 
@@ -94,11 +72,50 @@ namespace ADODemo
             }
         }
 
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Product prod = crud.GetProductById(Convert.ToInt32(textProdId.Text));
+                if (prod.Id > 0)
+                {
+                    List<Category> list = new List<Category>();
+                    for (int i = 0; i < table.Rows.Count; i++)
+                    {
+                        Category c = new Category();
+                        c.Cid = Convert.ToInt32(table.Rows[i]["cid"]);
+                        c.Cname = table.Rows[i]["cname"].ToString();
+                        list.Add(c);
+                    }
+                    foreach (Category item in list)
+                    {
+                        if (item.Cid == prod.Cid)
+                        {
+                            comboCategory.Text = item.Cname;
+                            break;
+                        }
+                    }
+                    textProdName.Text = prod.Name;
+                    textProdPrice.Text = prod.Price.ToString();
+
+                }
+                else
+                {
+                    MessageBox.Show("Record not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+
         private void btnDelete_Click(object sender, EventArgs e)
         {
             try
             {
-                
+
                 int res = crud.DeleteProduct(Convert.ToInt32(textProdId.Text));
                 if (res > 0)
                 {
@@ -113,11 +130,8 @@ namespace ADODemo
 
         private void btnShowAll_Click(object sender, EventArgs e)
         {
-            
-                DataTable table = crud.GetAllProducts();
-                dataGridView1.DataSource = table;
-            
-
+           DataSet ds = crud.GetAllProducts();
+           dataGridView1.DataSource = ds.Tables["Product"];
         }
     }
 }

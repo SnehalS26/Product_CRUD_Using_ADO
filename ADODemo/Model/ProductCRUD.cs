@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace ADODemo.Model
@@ -95,7 +96,21 @@ namespace ADODemo.Model
             con.Close ();
             return product;
         }
-        
+
+        public DataTable GetAllProducts()
+        {
+            DataTable dt = new DataTable();
+            string qry = "select * from Product";
+            cmd = new SqlCommand(qry, con);
+            con.Open();
+            dr = cmd.ExecuteReader();
+            if (dr.HasRows)
+            {
+                dt.Load(dr);
+            }
+            con.Close();
+            return dt;
+        }
 
         public List<Category> GetCategories()
         {
